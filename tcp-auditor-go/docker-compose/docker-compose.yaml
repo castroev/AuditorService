@@ -1,0 +1,32 @@
+version: '3.5'
+
+networks:
+  default:
+    external:
+      name: platform
+
+services:
+  tcp-auditor:
+    image: tcp-auditor-go:1.0.6-s3
+    depends_on: 
+      - consul
+      - mongo
+      - bootstrap-config
+    ports:
+      - 5020:8080
+    environment:
+      - ConfigurationUrl=consul:8500
+      - AWS_ACCESS_KEY_ID={}
+      - AWS_SECRET_ACCESS_KEY={}
+    networks:
+      - platform
+  
+  tcp-auditor-bootstrapper:
+    image: appropriate/curl
+    entrypoint: sh -c "dos2unix /config/init.sh && /config/init.sh"
+    environment: 
+      - MANIFESTCONTAINER=tcp-manifest-service
+      - CONSULCONTAINER=consul:8500
+      - PUBLISHAPPSETTINGS=0
+    volumes:
+      - "./config:/config"

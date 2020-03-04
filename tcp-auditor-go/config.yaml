@@ -1,0 +1,11 @@
+logLevel: debug
+database:
+  host: "blah"
+  port: "27017"
+  database: "CloudPlatformAuditor"
+  username: "root"
+  password: "password"
+oidc:
+  authority: "https://dev.tyleridentity.com/auth/realms/dev"  
+  wellKnownURL: "https://dev.tyleridentity.com/auth/realms/dev/.well-known/openid-configuration"
+  scope: ""

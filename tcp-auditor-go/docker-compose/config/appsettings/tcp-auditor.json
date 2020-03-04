@@ -1,0 +1,10 @@
+{
+    "S3": {
+        "bucket": "auditrecorde2etesting",
+        "region": "us-west-2"
+    },
+    "oidc": {
+        "authority": "https://dev.tyleridentity.com/auth/realms/dev",
+        "wellKnownURL": "https://dev.tyleridentity.com/auth/realms/dev/.well-known/openid-configuration"
+    }
+}
