@@ -1,10 +1,10 @@
 # build go
 FROM golang:alpine as builder
-RUN apk update && apk add --no-cache git gcc g++ libc-dev musl-dev ca-certificates bash 
+RUN apk update && apk add --no-cache git gcc g++ libc-dev musl-dev ca-certificates bash
 RUN addgroup -S appgroup && adduser -S -D -H -h /app -G appgroup appuser
 # COPY . $GOPATH/src/bitbucket.tylertech.com/scm/spy/tcp-auditor
-COPY ./out $GOPATH/src/bitbucket.tylertech.com/scm/spy/tcp-auditor
-WORKDIR $GOPATH/src/bitbucket.tylertech.com/scm/spy/tcp-auditor
+#COPY ./out $GOPATH/src/bitbucket.tylertech.com/scm/spy/tcp-auditor
+#WORKDIR $GOPATH/src/bitbucket.tylertech.com/scm/spy/tcp-auditor
 
 ENV GO111MODULE=on
 RUN go mod download
