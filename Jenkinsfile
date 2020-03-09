@@ -19,9 +19,9 @@ pipeline {
                 checkout scm
                 echo '(1) COMPLETE'
 
-                sh "ls"
-
                 echo '(2) Doocker build'
+                echo 'TODO: Should standardize project repos to include Dockerfile at SAME LEVEL as JenksnisFile!'
+                sh "cd tcp-auditor-go"
                 sh "docker build . -t $registry:$BUILD_NUMBER"
                 sh "docker build . -t $registry:latest"
                 echo '(2) COMPLETE'
