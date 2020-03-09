@@ -19,8 +19,12 @@ pipeline {
                 checkout scm
                 echo '(1) COMPLETE'
 
+                sh "ls"
+
+                echo '(2) Doocker build'
                 sh "docker build . -t $registry:$BUILD_NUMBER"
                 sh "docker build . -t $registry:latest"
+                echo '(2) COMPLETE'
             }
         }
         stage('Test') {
