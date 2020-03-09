@@ -16,7 +16,7 @@ EXPOSE 8080
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
 COPY --from=builder /etc/ssl/certs /etc/ssl/certs
-COPY . /app/
+COPY --chown=appuser:appgroup --from=builder /go/bin/tcp-auditor /app/
 USER appuser
 WORKDIR /app
 ENV GIN_MODE=release
