@@ -7,8 +7,8 @@ COPY . $GOPATH/src/bitbucket.tylertech.com/scm/spy/tcp-auditor
 WORKDIR $GOPATH/src/bitbucket.tylertech.com/scm/spy/tcp-auditor
 
 ENV GO111MODULE=on
-RUN go mod download {ERROR NO GO MOD DOWNLOAD SPECIFIED}
-RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags='-linkmode external -extldflags "-static"' -a -o /go/bin/tcp-auditor . {go: cannot find main module; see 'go help modules'The command '/bin/sh -c CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags='-linkmode external -extldflags "-static"' -a -o /go/bin/tcp-auditor .' returned a non-zero code: 1}
+RUN go mod download
+RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags='-linkmode external -extldflags "-static"' -a -o /go/bin/tcp-auditor .
 
 # build final image
 FROM scratch
