@@ -21,10 +21,11 @@ pipeline {
 
                 echo '(2) Doocker build'
                 echo 'TODO: Should standardize project repos to include Dockerfile at SAME LEVEL as JenksnisFile!'
-                sh "cd tcp-auditor-go"
-                sh "ls"
-                sh "docker build . -t $registry:$BUILD_NUMBER"
-                sh "docker build . -t $registry:latest"
+                dir("tcp-auditor-go") {
+                  sh "ls"
+                  sh "docker build . -t $registry:$BUILD_NUMBER"
+                  sh "docker build . -t $registry:latest"
+                }
                 echo '(2) COMPLETE'
             }
         }
@@ -38,9 +39,11 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 echo '(1) Pushing to registry....'
-                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+                dir("tcp-auditor-go") {
+                  withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
                     sh "docker push $registry:$BUILD_NUMBER"
                     sh "docker push $registry:latest"
+                  }
                 }
                 echo '(1) COMPLETE'
             }
