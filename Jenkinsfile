@@ -16,7 +16,7 @@ pipeline {
                 echo 'Building..'
                 echo 'Remember - access credentials are configured on connectinig the Jenkins application to the Repo target.'
                 echo '(1) Copy git files to build agent..'
-                git 'https://github.com/castroev/AuditorService.git'
+                checkout scm
                 echo '(1) COMPLETE'
 
                 sh "docker build . -t $registry:$BUILD_NUMBER"
