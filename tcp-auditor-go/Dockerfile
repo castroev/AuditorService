@@ -8,7 +8,7 @@ RUN addgroup -S appgroup && adduser -S -D -H -h /app -G appgroup appuser
 
 ENV GO111MODULE=on
 #RUN go mod download {ERROR NO GO MOD DOWNLOAD SPECIFIED}
-RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags='-linkmode external -extldflags "-static"' -a -o /go/bin/tcp-auditor .
+#RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags='-linkmode external -extldflags "-static"' -a -o /go/bin/tcp-auditor . {go: cannot find main module; see 'go help modules'The command '/bin/sh -c CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags='-linkmode external -extldflags "-static"' -a -o /go/bin/tcp-auditor .' returned a non-zero code: 1}
 
 # build final image
 FROM scratch
