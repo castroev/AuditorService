@@ -35,6 +35,11 @@ pipeline {
                 echo 'TODO: Interation and unit tests go here!'
             }
         }
+        stage('Push To Artifactory') {
+            steps {
+                echo 'Pushing to Artifactory....'
+            }
+        }
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
