@@ -43,16 +43,17 @@ pipeline {
                 echo 'TODO: Interaction and unit tests go here!'
             }
         }
-        stage('Push Images to Dockerhub') {
-            steps {
-                echo 'Pushing to Dockerhub registry....'
-                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
-                    sh "docker push ${service}:${epoch}_${commit}_${BUILD_NUMBER}"
-                    sh "docker push ${service}:latest"
-                }
-                echo 'Dockerhub push complete'
-            }
-        }
+// Disabling but leaving as example
+//        stage('Push Images to Dockerhub') {
+//            steps {
+//                echo 'Pushing to Dockerhub registry....'
+//                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+//                    sh "docker push ${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+//                    sh "docker push ${service}:latest"
+//                }
+//                echo 'Dockerhub push complete'
+//            }
+//        }
         stage('Push Images To Artifactory') {
             steps {
                 echo 'Artifactory push starting'
