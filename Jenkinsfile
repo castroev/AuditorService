@@ -47,8 +47,8 @@ pipeline {
             steps {
                 echo 'Pushing to Dockerhub registry....'
                 withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
-                    sh "docker push $registry:$BUILD_NUMBER"
-                    sh "docker push $registry:latest"
+                    sh "docker push ${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                    sh "docker push ${service}:latest"
                 }
                 echo 'Dockerhub push complete'
             }
