@@ -43,6 +43,16 @@ pipeline {
                 echo 'TODO: Interaction and unit tests go here!'
             }
         }
+        stage('Push Images to Dockerhub') {
+            steps {
+                echo 'Pushing to Dockerhub registry....'
+                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+                    sh "docker push $registry:$BUILD_NUMBER"
+                    sh "docker push $registry:latest"
+                }
+                echo 'Dockerhub push complete'
+            }
+        }
         stage('Push Images To Artifactory') {
             steps {
                 echo 'Artifactory push starting'
