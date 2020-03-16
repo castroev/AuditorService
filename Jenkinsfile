@@ -6,8 +6,18 @@ pipeline {
     }
 
     environment {
-        registry = "joenunnelley/docker-test"
-        registryCredential = "dockerhub"
+        repository = "tylertech-corpdev-docker-local.jfrog.io"
+        registry = "https://tylertech.jfrog.io"
+        registryCredential = "artifactory"
+        service = "tcp-auditor-go"
+        epoch = """${sh(
+                        returnStdout: true,
+                        script: "date +%s | tr -d '\n'"
+                    )}"""
+        commit = """${sh(
+                        returnStdout: true,
+                        script: "git log -n 1 --pretty=format:'%H'"
+                    )}"""
     }
 
     stages {
@@ -15,42 +25,56 @@ pipeline {
             steps {
                 echo 'Building..'
                 echo 'Remember - access credentials are configured on connectinig the Jenkins application to the Repo target.'
-                echo '(1) Copy git files to build agent..'
+                echo 'Copy git files to build agent..'
                 checkout scm
-                echo '(1) COMPLETE'
-
-                echo '(2) Doocker build'
-                echo 'TODO: Should standardize project repos to include Dockerfile at SAME LEVEL as JenksnisFile!'
-                dir("tcp-auditor-go") {
-                  sh "ls"
-                  sh "docker build . -t $registry:$BUILD_NUMBER"
-                  sh "docker build . -t $registry:latest"
+                echo 'Copy git files complete'
+                echo "Docker build starting: ${repository}/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                echo 'TODO: Should standardize project repos to include a Dockerfile at SAME LEVEL as the JenkinsFile!'
+                dir("${service}") {
+                  sh "docker build . -t $repository/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                  sh "docker build . -t $repository/${service}:latest"
                 }
-                echo '(2) COMPLETE'
+                echo 'Docker build complete'
             }
         }
         stage('Test') {
             steps {
                 echo 'Testing..'
-                echo 'TODO: Interation and unit tests go here!'
+                echo 'TODO: Interaction and unit tests go here!'
             }
         }
-        stage('Push To Artifactory') {
+// Disabling but leaving as example
+//        stage('Push Images to Dockerhub') {
+//            steps {
+//                echo 'Pushing to Dockerhub registry....'
+//                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+//                    sh "docker push ${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+//                    sh "docker push ${service}:latest"
+//                }
+//                echo 'Dockerhub push complete'
+//            }
+//        }
+        stage('Push Images To Artifactory') {
             steps {
-                echo 'Pushing to Artifactory....'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
-                echo '(1) Pushing to registry....'
-                dir("tcp-auditor-go") {
-                  withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
-                    sh "docker push $registry:$BUILD_NUMBER"
-                    sh "docker push $registry:latest"
-                  }
+                echo 'Artifactory push starting'
+                dir("${service}") {
+                    echo "Connecting to: ${registry}"
+                    script {
+                        def rtServer = Artifactory.server "TylerArtifactory"
+                        def rtDocker = Artifactory.docker server: rtServer
+
+                        def buildInfo = rtDocker.push "${repository}/${service}:${epoch}_${commit}_${BUILD_NUMBER}", "${repository}"
+                        def buildInfoLatest = rtDocker.push "${repository}/${service}:latest", "${repository}"
+                    }
                 }
-                echo '(1) COMPLETE'
+                echo 'Artifactory push complete'
+            }
+        }
+        stage('Cleanup Images') {
+            steps {
+                echo 'Removing built docker images'
+                sh "docker rmi $repository/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                sh "docker rmi $repository/${service}:latest"
             }
         }
     }
