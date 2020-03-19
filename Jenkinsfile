@@ -10,6 +10,7 @@ pipeline {
         registry = "https://tylertech.jfrog.io"
         registryCredential = "artifactory"
         service = "tcp-auditor-go"
+        k8_deployment = ""
         epoch = """${sh(
                         returnStdout: true,
                         script: "date +%s | tr -d '\n'"
@@ -18,6 +19,8 @@ pipeline {
                         returnStdout: true,
                         script: "git log -n 1 --pretty=format:'%H'"
                     )}"""
+        tag = "${epoch}_${commit}_${BUILD_NUMBER}"
+        deploymentConfig = "auditorDeploy.yaml"
     }
 
     stages {
@@ -55,26 +58,38 @@ pipeline {
 //            }
 //        }
         stage('Push Images To Artifactory') {
+            options {
+                timeout(time: 5, unit: 'MINUTES')
+            }
             steps {
                 echo 'Artifactory push starting'
                 dir("${service}") {
-                    echo "Connecting to: ${registry}"
-                    script {
-                        def rtServer = Artifactory.server "TylerArtifactory"
-                        def rtDocker = Artifactory.docker server: rtServer
-
-                        def buildInfo = rtDocker.push "${repository}/${service}:${epoch}_${commit}_${BUILD_NUMBER}", "${repository}"
-                        def buildInfoLatest = rtDocker.push "${repository}/${service}:latest", "${repository}"
-                    }
+                    echo "Connecting to registry: ${registry} and logging into ${repository}"
+                    sh "docker login ${repository}"
+                    sh "docker push ${repository}/${service}:${tag}"
+                    sh "docker push ${repository}/${service}:latest"
                 }
                 echo 'Artifactory push complete'
+            }
+        }
+        stage('Deploy To Kubernetes') {
+            steps {
+                kubernetesDeploy(configs: "${deploymentConfig}",
+                                 kubeConfig: [path: ''],
+                                 kubeconfigId: 'TCP-CI-Cluster',
+                                 enableConfigSubstitution: true,
+                                 secretName: 'tylerartifactory',
+                                 secretNamespace: 'default',
+                                 ssh: [sshCredentialsId: '*', sshServer: ''],
+                                 textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://'])
             }
         }
         stage('Cleanup Images') {
             steps {
                 echo 'Removing built docker images'
-                sh "docker rmi $repository/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                sh "docker rmi $repository/${service}:${tag}"
                 sh "docker rmi $repository/${service}:latest"
+                sh "docker image prune -f"
             }
         }
     }

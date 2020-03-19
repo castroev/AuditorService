@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ${service}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${service}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ${service}
+        name: ${service}
+    spec:
+      containers:
+        - env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_ACCESS_KEY_ID
+                  name: tcp-branding-service
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_SECRET_ACCESS_KEY
+                  name: tcp-branding-service
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_TRACE_AGENT_PORT
+              value: '8126'
+            - name: GOGC
+              value: '5'
+            - name: ConfigurationUrl
+              value: 'consul:8500'
+            - name: ConfigurationServer__uri
+              value: 'consul:8500'
+          image: "tylertech-docker.jfrog.io/${service}:latest"
+          name: ${service}-container
+          resources:
+            limits:
+              cpu: 200m
+              memory: 20Mi
+            requests:
+              cpu: 100m
+      imagePullSecrets:
+        - name: tylerartifactory
