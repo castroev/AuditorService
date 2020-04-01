@@ -42,7 +42,7 @@ spec:
               value: 'consul:8500'
             - name: ConfigurationServer__uri
               value: 'consul:8500'
-          image: "tylertech-docker.jfrog.io/${service}:latest"
+          image: "tylertech-docker.jfrog.io/${service}:${tag}"
           name: ${service}-container
           resources:
             limits:

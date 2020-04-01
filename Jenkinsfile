@@ -34,7 +34,6 @@ pipeline {
                 echo "Docker build starting: ${repository}/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
                 echo 'TODO: Should standardize project repos to include a Dockerfile at SAME LEVEL as the JenkinsFile!'
                 dir("${service}") {
-                  sh "docker build . -t $repository/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
                   sh "docker build . -t $repository/${service}:latest"
                 }
                 echo 'Docker build complete'
@@ -46,17 +45,18 @@ pipeline {
                 echo 'TODO: Interaction and unit tests go here!'
             }
         }
-// Disabling but leaving as example
-//        stage('Push Images to Dockerhub') {
-//            steps {
-//                echo 'Pushing to Dockerhub registry....'
-//                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
-//                    sh "docker push ${service}:${epoch}_${commit}_${BUILD_NUMBER}"
-//                    sh "docker push ${service}:latest"
-//                }
-//                echo 'Dockerhub push complete'
-//            }
-//        }
+        stage('Push Images to Dockerhub') {
+            steps {
+                echo 'Pushing to Dockerhub registry....'
+                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+                    sh "docker image tag $repository/${service}:latest tylerorg/${service}:latest"
+                    sh "docker image tag $repository/${service}:latest tylerorg/${service}:${tag}"
+                    sh "docker push tylerorg/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                    sh "docker push tylerorg/${service}:latest"
+                }
+                echo 'Dockerhub push complete'
+            }
+        }
         stage('Push Images To Artifactory') {
             options {
                 timeout(time: 5, unit: 'MINUTES')
@@ -64,6 +64,7 @@ pipeline {
             steps {
                 echo 'Artifactory push starting'
                 dir("${service}") {
+                    sh "docker image tag $repository/${service}:latest $repository/${service}:${tag}"
                     echo "Connecting to registry: ${registry} and logging into ${repository}"
                     sh "docker login ${repository}"
                     sh "docker push ${repository}/${service}:${tag}"
