@@ -1,3 +1,4 @@
+// Organization: Tyler Technologies
 pipeline {
     agent any
     options {
