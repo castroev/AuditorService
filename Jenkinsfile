@@ -46,29 +46,32 @@ pipeline {
             }
         }
         stage('Push Images to Dockerhub') {
+            when {
+                branch 'master'
+            }
             steps {
                 echo 'Pushing to Dockerhub registry....'
                 withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
                     sh "docker image tag $repository/${service}:latest tylerorg/${service}:latest"
-                    sh "docker image tag $repository/${service}:latest tylerorg/${service}:${tag}"
-                    sh "docker push tylerorg/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
                     sh "docker push tylerorg/${service}:latest"
+                    sh "docker image tag tylerorg/${service}:latest tylerorg/${service}:${tag}"
+                    sh "docker push tylerorg/${service}:${tag}"
                 }
                 echo 'Dockerhub push complete'
             }
         }
         stage('Push Images To Artifactory') {
             options {
-                timeout(time: 5, unit: 'MINUTES')
+                timeout(time: 15, unit: 'MINUTES')
             }
             steps {
                 echo 'Artifactory push starting'
                 dir("${service}") {
-                    sh "docker image tag $repository/${service}:latest $repository/${service}:${tag}"
                     echo "Connecting to registry: ${registry} and logging into ${repository}"
                     sh "docker login ${repository}"
-                    sh "docker push ${repository}/${service}:${tag}"
                     sh "docker push ${repository}/${service}:latest"
+                    sh "docker image tag $repository/${service}:latest $repository/${service}:${tag}"
+                    sh "docker push ${repository}/${service}:${tag}"
                 }
                 echo 'Artifactory push complete'
             }
