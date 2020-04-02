@@ -1,12 +1,12 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: auditor-test
+  name: ${service}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auditor-test
+      app: ${service}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -15,8 +15,8 @@ spec:
   template:
     metadata:
       labels:
-        app: auditor-test
-        name: auditor-test
+        app: ${service}
+        name: ${service}
     spec:
       containers:
         - env:
@@ -42,8 +42,8 @@ spec:
               value: 'consul:8500'
             - name: ConfigurationServer__uri
               value: 'consul:8500'
-          image: 'joenunnelley/docker-test:latest'
-          name: auditor-test
+          image: "tylertech-docker.jfrog.io/${service}:${tag}"
+          name: ${service}-container
           resources:
             limits:
               cpu: 200m
@@ -51,4 +51,4 @@ spec:
             requests:
               cpu: 100m
       imagePullSecrets:
-        - name: tylerorg
+        - name: tylerartifactory

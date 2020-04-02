@@ -10,6 +10,7 @@ pipeline {
         registry = "https://tylertech.jfrog.io"
         registryCredential = "artifactory"
         service = "tcp-auditor-go"
+        k8_deployment = ""
         epoch = """${sh(
                         returnStdout: true,
                         script: "date +%s | tr -d '\n'"
@@ -18,6 +19,8 @@ pipeline {
                         returnStdout: true,
                         script: "git log -n 1 --pretty=format:'%H'"
                     )}"""
+        tag = "${epoch}_${commit}_${BUILD_NUMBER}"
+        deploymentConfig = "auditorDeploy.yaml"
     }
 
     stages {
@@ -31,7 +34,6 @@ pipeline {
                 echo "Docker build starting: ${repository}/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
                 echo 'TODO: Should standardize project repos to include a Dockerfile at SAME LEVEL as the JenkinsFile!'
                 dir("${service}") {
-                  sh "docker build . -t $repository/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
                   sh "docker build . -t $repository/${service}:latest"
                 }
                 echo 'Docker build complete'
@@ -43,38 +45,55 @@ pipeline {
                 echo 'TODO: Interaction and unit tests go here!'
             }
         }
-// Disabling but leaving as example
-//        stage('Push Images to Dockerhub') {
-//            steps {
-//                echo 'Pushing to Dockerhub registry....'
-//                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
-//                    sh "docker push ${service}:${epoch}_${commit}_${BUILD_NUMBER}"
-//                    sh "docker push ${service}:latest"
-//                }
-//                echo 'Dockerhub push complete'
-//            }
-//        }
+        stage('Push Images to Dockerhub') {
+            when {
+                branch 'master'
+            }
+            steps {
+                echo 'Pushing to Dockerhub registry....'
+                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+                    sh "docker image tag $repository/${service}:latest tylerorg/${service}:latest"
+                    sh "docker push tylerorg/${service}:latest"
+                    sh "docker image tag tylerorg/${service}:latest tylerorg/${service}:${tag}"
+                    sh "docker push tylerorg/${service}:${tag}"
+                }
+                echo 'Dockerhub push complete'
+            }
+        }
         stage('Push Images To Artifactory') {
+            options {
+                timeout(time: 15, unit: 'MINUTES')
+            }
             steps {
                 echo 'Artifactory push starting'
                 dir("${service}") {
-                    echo "Connecting to: ${registry}"
-                    script {
-                        def rtServer = Artifactory.server "TylerArtifactory"
-                        def rtDocker = Artifactory.docker server: rtServer
-
-                        def buildInfo = rtDocker.push "${repository}/${service}:${epoch}_${commit}_${BUILD_NUMBER}", "${repository}"
-                        def buildInfoLatest = rtDocker.push "${repository}/${service}:latest", "${repository}"
-                    }
+                    echo "Connecting to registry: ${registry} and logging into ${repository}"
+                    sh "docker login ${repository}"
+                    sh "docker push ${repository}/${service}:latest"
+                    sh "docker image tag $repository/${service}:latest $repository/${service}:${tag}"
+                    sh "docker push ${repository}/${service}:${tag}"
                 }
                 echo 'Artifactory push complete'
+            }
+        }
+        stage('Deploy To Kubernetes') {
+            steps {
+                kubernetesDeploy(configs: "${deploymentConfig}",
+                                 kubeConfig: [path: ''],
+                                 kubeconfigId: 'TCP-CI-Cluster',
+                                 enableConfigSubstitution: true,
+                                 secretName: 'tylerartifactory',
+                                 secretNamespace: 'default',
+                                 ssh: [sshCredentialsId: '*', sshServer: ''],
+                                 textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://'])
             }
         }
         stage('Cleanup Images') {
             steps {
                 echo 'Removing built docker images'
-                sh "docker rmi $repository/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                sh "docker rmi $repository/${service}:${tag}"
                 sh "docker rmi $repository/${service}:latest"
+                sh "docker image prune -f"
             }
         }
     }
