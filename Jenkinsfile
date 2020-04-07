@@ -27,7 +27,8 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building..'
+		echo 'Consul pipeline seed...'
+                echo 'Building...'
                 echo 'Remember - access credentials are configured on connectinig the Jenkins application to the Repo target.'
                 echo 'Copy git files to build agent..'
                 checkout scm
