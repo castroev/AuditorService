@@ -1,0 +1,11 @@
+{
+  "S3": {
+    "bucket": "cloudplatformauditing",
+    "region": "us-west-2"
+  },
+  "oidc": {
+    "authority": "https://devbroker.tyleridentity.com/oauth2/auskrsqd5dMlo6KkA0h7",
+    "wellKnownURL": "https://devbroker.tyleridentity.com/oauth2/auskrsqd5dMlo6KkA0h7.well-known/openid-configuration"
+  },
+  "ConfigurationUrl": "consul:8500"
+}
