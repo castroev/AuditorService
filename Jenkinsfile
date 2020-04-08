@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        repository = "index.docker.io/tylerorg"
+        repository = "tylerorg"
         registry = "https://tylertech.jfrog.io"
         registryCredential = "artifactory"
         service = "tcp-auditor-go"
