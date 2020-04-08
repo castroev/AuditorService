@@ -1,0 +1,11 @@
+{
+  "S3": {
+    "bucket": "cloudplatformauditing",
+    "region": "us-east-1"
+  },
+  "oidc": {
+    "authority": "https://tylertech.okta.com/oauth2/ausscpvsxhgKQBzoO356/",
+    "wellKnownURL": "https://tylertech.okta.com/oauth2/ausscpvsxhgKQBzoO356/.well-known/openid-configuration"
+  },
+  "ConfigurationUrl": "consul:8500"
+}

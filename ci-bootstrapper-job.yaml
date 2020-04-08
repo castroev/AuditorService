@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${bootstrap}-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: ${bootstrap}-job
+        image: "tylertech-docker.jfrog.io/${bootstrap}:${tag}"
+        env:
+        - name: CONSULCONTAINER
+          value: consul:8500
+        - name: DEPLOYMENTSTAGE
+          value: CI
+      restartPolicy: Never
