@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        repository = "tylertech-corpdev-docker-local.jfrog.io"
+        repository = "tylerorg"
         registry = "https://tylertech.jfrog.io"
         registryCredential = "artifactory"
         service = "tcp-auditor-go"
@@ -76,30 +76,6 @@ pipeline {
                 echo 'Dockerhub push complete'
             }
         }
-        stage('Push Images To Artifactory') {
-            options {
-                timeout(time: 15, unit: 'MINUTES')
-            }
-            steps {
-                echo 'Artifactory push starting'
-                dir("${service}") {
-                    echo "Connecting to registry: ${registry} and logging into ${repository}"
-                    sh "docker login ${repository}"
-                    sh "docker push ${repository}/${service}:latest"
-                    sh "docker image tag $repository/${service}:latest $repository/${service}:${tag}"
-                    sh "docker push ${repository}/${service}:${tag}"
-                }
-                echo 'Artifactory bootstrapper push starting'
-                dir("${bootstrap}") {
-                    echo "Connecting to registry: ${bootstrap} and logging into ${repository}"
-                    sh "docker login ${repository}"
-                    sh "docker push ${repository}/${bootstrap}:latest"
-                    sh "docker image tag $repository/${bootstrap}:latest $repository/${bootstrap}:${tag}"
-                    sh "docker push ${repository}/${bootstrap}:${tag}"
-                }
-                echo 'Artifactory push complete'
-            }
-        }
         stage('Deploy To Kubernetes') {
             steps {
               kubernetesDeploy(configs: "${ciBootstrapperConfig}",
@@ -123,8 +99,6 @@ pipeline {
         stage('Cleanup Images') {
             steps {
                 echo 'Removing built docker images'
-                sh "docker rmi $repository/${service}:${tag}"
-                sh "docker rmi $repository/${service}:latest"
                 sh "docker rmi $repository/${bootstrap}:${tag}"
                 sh "docker rmi $repository/${bootstrap}:latest"
                 sh "docker image prune -f"

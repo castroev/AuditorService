@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
       - name: ${bootstrap}-job
-        image: "tylertech-docker.jfrog.io/${bootstrap}:${tag}"
+        image: "${repository}/${bootstrap}:${tag}"
         env:
         - name: CONSULCONTAINER
           value: consul:8500
