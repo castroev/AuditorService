@@ -1,4 +1,5 @@
 // Organization: Tyler Technologies
+// Author: Tyler Cloud Platform Team
 pipeline {
     agent any
     options {
