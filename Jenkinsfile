@@ -37,12 +37,12 @@ pipeline {
                 echo 'Copy git files to build agent..'
                 checkout scm
                 echo 'Copy git files complete'
-                echo "Docker build starting: ${repository}/${service}:${epoch}_${commit}_${BUILD_NUMBER}"
+                echo "Docker build starting: ${repository}/${service}:${tag}"
                 echo 'TODO: Should standardize project repos to include a Dockerfile at SAME LEVEL as the JenkinsFile!'
                 dir("${service}") {
                   sh "docker build . -t $repository/${service}:latest"
                 }
-                echo "Docker build bootstrap starting: ${repository}/${bootstrap}:${epoch}_${commit}_${BUILD_NUMBER}"
+                echo "Docker build bootstrap starting: ${repository}/${bootstrap}:${tag}"
                 dir("${bootstrap}") {
                   sh "docker build . -t $repository/${bootstrap}:latest"
                 }
@@ -77,6 +77,26 @@ pipeline {
                 echo 'Dockerhub push complete'
             }
         }
+        stage('Push Images To Artifactory') {
+            options {
+                timeout(time: 15, unit: 'MINUTES')
+            }
+            steps {
+                echo 'Artifactory push starting'
+                dir("${service}") {
+                    echo "Connecting to registry: ${registry} and logging into ${repository}"
+                    sh "docker login ${repository}"
+                    sh "docker image tag ${repository}/${service}:latest ${repository}/${service}:${tag}"
+                    sh "docker push ${repository}/${service}:latest"
+                    sh "docker push ${repository}/${service}:${tag}"
+
+                    sh "docker image tag $repository/${bootstrap}:latest $repositor/${bootstrap}:${tag}"
+                    sh "docker push ${repository}/${bootstrap}:latest"
+                    sh "docker push ${repository}/${bootstrap}:${tag}"
+                }
+                echo 'Artifactory push complete'
+            }
+        }
         stage('Deploy To Kubernetes') {
             steps {
               kubernetesDeploy(configs: "${ciBootstrapperConfig}",
@@ -100,6 +120,8 @@ pipeline {
         stage('Cleanup Images') {
             steps {
                 echo 'Removing built docker images'
+                sh "docker rmi $repository/${service}:${tag}"
+                sh "docker rmi $repository/${service}:latest"
                 sh "docker rmi $repository/${bootstrap}:${tag}"
                 sh "docker rmi $repository/${bootstrap}:latest"
                 sh "docker image prune -f"
