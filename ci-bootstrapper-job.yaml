@@ -4,6 +4,8 @@ metadata:
   name: auditorbootstrap
 spec:
   template:
+    metadata:
+      name: auditorbootstrap
     spec:
       imagePullSecrets:
         - name: tylerorg
