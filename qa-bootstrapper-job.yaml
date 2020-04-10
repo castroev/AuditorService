@@ -5,8 +5,10 @@ metadata:
 spec:
   template:
     spec:
+      imagePullSecrets:
+        - name: tylerorg
       containers:
-      - name: ${bootstrap}-job
+      - name: auditorbootstrap-job
         image: "${repository}/${bootstrap}:${tag}"
         env:
         - name: CONSULCONTAINER

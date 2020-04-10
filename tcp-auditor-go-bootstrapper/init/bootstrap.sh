@@ -21,6 +21,7 @@ fi
 if [ -n "$CONSULCONTAINER" ] && [ "$PUBLISHAPPSETTINGS" = 1 ] && [ "$DEPLOYMENTSTAGE" = "CI" ]; then
     echo 'bootstrapping appsettings'
     for filename in /config/ci/appsettings/*.json; do
+        echo "sending varfile $filename"
         a="$(echo "$filename" | sed 's@.*/@@' | sed 's/[.].*//')"
         curl -0 --request PUT --data @"$filename" http://"${CONSULCONTAINER}"/v1/kv/"$a"/appsettings.json -H "Content-Type:application/json"
     done
