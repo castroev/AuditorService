@@ -8,7 +8,7 @@ spec:
       imagePullSecrets:
         - name: tylerorg
       containers:
-        name: ${bootstrap}-job
+      - name: ${bootstrap}-job
         image: "${repository}/${bootstrap}:${tag}"
         env:
         - name: CONSULCONTAINER
