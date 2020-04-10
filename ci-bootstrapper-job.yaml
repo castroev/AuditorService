@@ -3,13 +3,13 @@ kind: Job
 spec:
   template:
     metadata:
-      name: auditorbootstrap
+      name: ${bootstrap}-job
     spec:
       imagePullSecrets:
         - name: tylerorg
       containers:
-      - name: auditorbootstrap
-        image: "tylerorg/tcp-auditor-go-bootstrapper:latest"
+      - name: ${bootstrap}-job
+        image: "${repository}/${bootstrap}:${tag}"
         env:
         - name: CONSULCONTAINER
           value: consul:8500
