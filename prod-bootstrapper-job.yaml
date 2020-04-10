@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       containers:
-      - name: ${bootstrap}-job
+        name: ${bootstrap}-job
         image: "${repository}/${bootstrap}:${tag}"
         env:
         - name: CONSULCONTAINER
