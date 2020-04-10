@@ -14,4 +14,3 @@ spec:
           value: consul:8500
         - name: DEPLOYMENTSTAGE
           value: PROD
-
