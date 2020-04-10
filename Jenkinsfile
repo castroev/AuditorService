@@ -98,7 +98,7 @@ pipeline {
                 echo 'Artifactory push complete'
             }
         }
-        stage('Deploy To Kubernetes') {
+        stage('Deploy To Kubernetes: TCPCI') {
             steps {
               kubernetesDeploy(configs: "${ciBootstrapperConfig}",
                                  kubeConfig: [path: ''],
