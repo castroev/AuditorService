@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ${bootstrap}-job
+  name: auditorbootstrap
 spec:
   template:
     spec:
       imagePullSecrets:
         - name: tylerorg
       containers:
-      - name: auditorbootstrap-job
+      - name: auditorbootstrap
         image: "${repository}/${bootstrap}:${tag}"
         env:
         - name: CONSULCONTAINER
