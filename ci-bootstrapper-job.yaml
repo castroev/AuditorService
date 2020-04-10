@@ -9,7 +9,7 @@ spec:
         - name: tylerorg
       containers:
       - name: auditorbootstrap
-        image: "${repository}/${bootstrap}:${tag}"
+        image: "tylerorg/tcp-auditor-go-bootstrapper:latest"
         env:
         - name: CONSULCONTAINER
           value: consul:8500
