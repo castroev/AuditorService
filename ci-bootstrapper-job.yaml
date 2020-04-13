@@ -5,14 +5,14 @@ spec:
     metadata:
       name: auditorbootstrap
     spec:
+      restartPolicy: Never
       imagePullSecrets:
-        - name: tylerorg
+        - name: tylerartifactory
       containers:
-      - name: auditorbootstrap
-        image: "tylerorg/tcp-auditor-go-bootstrapper:latest"
+      - name: ${bootstrap}-job
+        image: "tylertech-docker.jfrog.io/${bootstrap}:${tag}"
         env:
         - name: CONSULCONTAINER
           value: consul:8500
         - name: DEPLOYMENTSTAGE
           value: CI
-      restartPolicy: Never
